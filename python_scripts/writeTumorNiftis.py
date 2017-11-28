@@ -7,10 +7,11 @@ maskSet = "insidemasksnew" # selects which masks to use
 scanSet = "fullscans" # selects which set of scans to use
 maskNames = os.listdir(os.path.join(fileAddress,maskSet)) # name of mask nifti
 fullScanNames = os.listdir(os.path.join(fileAddress,scanSet)) # name of reference scan nifti
-print(maskNames)
-print(fullScanNames)
-
+print(maskNames[-1])
 for maskName in maskNames:
+	if maskName[0:4] !="SABR":
+		continue
+
 	relevantScanNames = []
 	for fullScanName in fullScanNames:
 		if fullScanName[0:7] == maskName[0:7]:
@@ -34,7 +35,7 @@ for maskName in maskNames:
 			os.makedirs	(os.path.join("D:/niftyfolder",relevantScanName[0:7]))
 		nib.save(outputNifti,os.path.join("D:/niftyfolder",relevantScanName[0:7],relevantScanName))
 
-
+print("done")
 """
 mask_img = nib.load(file_address+mask_name)
 mask_data = mask_img.get_data()
