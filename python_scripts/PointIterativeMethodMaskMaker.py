@@ -10,54 +10,48 @@ import numpy as np
 import os
 import nibabel as nib
 import matplotlib.pyplot as plt
-
-datafile = "F:/fullGTV"
-filenames = os.listdir(datafile)
-file = os.path.join(datafile, filenames[0])
-img = nib.load(file)
-img_data = img.get_data() # puts data into format plt can use
-
-
-# Show slices of raw data as an image
-
-# In[2]:
-
-
-# function to show slices as an object
-def show_slice(slice_obj):
-    # Function to display row of image slices
-    fig, axes = plt.subplots(1)
-    axes.imshow(slice_obj, cmap="gray", origin="lower")
-    
-scan_slice = img_data[:,:,80]
-show_slice(img_data[:,:,80]) # use 80 as default slide number for testing
-plt.show()
-
-
-# Get pixels around the tumour in scan slice
-
-# In[3]:
-
-
-from skimage import feature
-
-edges = feature.canny(scan_slice,sigma=2)
-show_slice(edges) # show edges of image
-print(edges.max())
-plt.show()
-
-
-# In[8]:
-
-
 import skimage.filters
 import skimage.morphology
-mask = skimage.filters.rank.maximum(edges,skimage.morphology.disk(2))
-show_slice(edges_new[200:250,150:220])
-plt.show()
+from skimage import feature
+
+inputFile = "D:/fullGTVfixed" #  file containing full GTV niftis
+outputFile = "D:/i20o20masksNew"
+radius_of_mask =  2 # radius of mask in pixels (1 px is equivalent to 1 mm)
+
+def show_slice(slice_obj):
+	    # Function to display row of image slices
+	    fig, axes = plt.subplots(1)
+	    axes.imshow(slice_obj, cmap="gray", origin="lower")
+
+filenames = os.listdir(inputFile)
+for filename in filenames:
+	file = os.path.join(inputFile, filename)
+	img = nib.load(file)
+	img_data = img.get_data() # puts data into format plt can use
+
+	# Show slices of raw data as an image
+
+	# In[2]:
 
 
-# In[ ]:
+	# function to show slices as an object
+	
+	output_array = np.zeros(np.shape(img_data))    
+	#scan_slice = img_data[:,:,80]
+	for i in range(np.shape(img_data)[2]):
+		scan_slice = img_data[:,:,i]
+		scan_slice[np.where(scan_slice > 0)] = 255 # gets rid of grey regions (see lab book 28/11/2017)
+		# Get pixels around the tumour in scan slice
+		edges = feature.canny(scan_slice,sigma=2)
+
+		# apply point iterative filer to get mask
+		mask = skimage.filters.rank.maximum(edges,skimage.morphology.disk(radius_of_mask))
+		output_array[:,:,i] = mask
+
+	output_array = np.array(output_array)
+	nifti_image = nib.Nifti1Image(output_array,np.eye(4)) # create mask nifti to be saved
+	nib.save(nifti_image,os.path.join(outputFile,filename.replace("registered_OARsGTV.nii","i20o20maskNew.nii")))
+
 
 
 

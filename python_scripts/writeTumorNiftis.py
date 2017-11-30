@@ -1,17 +1,15 @@
+# COMBINES MASKS AND SCANS TO GENERATE TUMOUR NIFTIS
+
 import numpy as np
 import nibabel as nib # used to read in nifti files
 import os
 
-fileAddress = "C:/Users/Rhydian/Documents/Work/MPhysProject/nifty folder/" # directory containing both nifti files
-maskSet = "insidemasksnew" # selects which masks to use
-scanSet = "fullscans" # selects which set of scans to use
-maskNames = os.listdir(os.path.join(fileAddress,maskSet)) # name of mask nifti
-fullScanNames = os.listdir(os.path.join(fileAddress,scanSet)) # name of reference scan nifti
+maskFolder = "D:/fullGTVfixed"
+scanFolder = "D:/fullscans" # selects which set of scans to use
+maskNames = os.listdir(maskFolder) # name of mask nifti
+fullScanNames = os.listdir(scanFolder) # name of reference scan nifti
 print(maskNames[-1])
 for maskName in maskNames:
-	if maskName[0:4] !="SABR":
-		continue
-
 	relevantScanNames = []
 	for fullScanName in fullScanNames:
 		if fullScanName[0:7] == maskName[0:7]:
@@ -19,21 +17,21 @@ for maskName in maskNames:
 	print(relevantScanNames)
 	for relevantScanName in relevantScanNames:
 		# load up nifti files
-		scan = nib.load(os.path.join(fileAddress,scanSet,relevantScanName))
-		mask = nib.load(os.path.join(fileAddress,maskSet,maskName))
+		scan = nib.load(os.path.join(scanFolder,relevantScanName))
+		mask = nib.load(os.path.join(maskFolder,maskName))
 		# put nifti files into np array and set all mask values to 1 or 0 and all
 		# scanArr values which are 1 to zero
 		scanArr = np.array(scan.get_data())
 		maskArr = np.array(mask.get_data())
 		scanArr[np.where(scanArr == 1)] = 0
-		maskArr[np.where(maskArr == 255)] = 1
+		maskArr[np.where(maskArr == maskArr.max())] = 1
 		# apply mask to scan by multiplying them together and put into outputArr
 		outputArr = scanArr*maskArr
 		# save outputArr as a nifti file
 		outputNifti = nib.Nifti1Image(outputArr, np.eye(4))
-		if not (os.path.exists(os.path.join("D:/niftyfolder",relevantScanName[0:7]))):
-			os.makedirs	(os.path.join("D:/niftyfolder",relevantScanName[0:7]))
-		nib.save(outputNifti,os.path.join("D:/niftyfolder",relevantScanName[0:7],relevantScanName))
+		if not (os.path.exists(os.path.join("D:/fullTumourNiftys",relevantScanName[0:7]))):
+			os.makedirs	(os.path.join("D:/fullTumourNiftys",relevantScanName[0:7]))
+		nib.save(outputNifti,os.path.join("D:/fullTumourNiftys",relevantScanName[0:7],relevantScanName))
 
 print("done")
 """
