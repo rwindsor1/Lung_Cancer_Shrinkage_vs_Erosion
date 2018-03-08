@@ -9,8 +9,6 @@ import skimage
 # generates a mask array from a numpy array
 def create_mask(gtv_arr, threshold = 500,sigma = 0.05, radius_of_mask = 2,small_obj_size = 20):
 	mask_arr = np.copy(gtv_arr)
-	healthy_tissue_mean = mask_arr[np.where(mask_arr<threshold and mask_arr>0)].mean()
-	healthy_tissue_variance = mask_arr[np.where(mask_arr<threshold and mask_arr>0)].mean()
 	mask_arr[np.where(mask_arr<threshold)] = 0
 	for i in range(np.shape(mask_arr)[2]):
 		scan_slice = scipy.ndimage.binary_fill_holes(mask_arr[:,:,i])
@@ -19,7 +17,7 @@ def create_mask(gtv_arr, threshold = 500,sigma = 0.05, radius_of_mask = 2,small_
 		mask = skimage.filters.rank.maximum(edges,skimage.morphology.disk(radius_of_mask))
 		mask_arr[:,:,i] = mask
 		
-	return mask_arr,healthy_tissue_mean
+	return mask_arr
 
 # gets the values of healthy tissue mean and standard devation around the tumour
 def get_healthy_tissue_vals(gtv_arr,threshold = 500):
