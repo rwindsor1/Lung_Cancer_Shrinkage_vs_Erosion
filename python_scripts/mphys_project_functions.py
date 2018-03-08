@@ -20,3 +20,9 @@ def create_mask(gtv_arr, threshold = 500, radius_of_mask = 2):
 		mask_arr[:,:,i] = mask
 		
 	return mask_arr
+	
+def show_slice(slice_obj):
+    fig,axes = plt.subplots(1)
+    axes.imshow(slice_obj, cmap='gray',origin='lower')
+    plt.show()
+    
