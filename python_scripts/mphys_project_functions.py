@@ -21,7 +21,7 @@ def create_mask(gtv_arr, threshold = 500,sigma = 0.05, radius_of_mask = 2,small_
 
 # gets the values of healthy tissue mean and standard devation around the tumour
 def get_healthy_tissue_vals(gtv_arr,threshold = 500):
-	return gtv_arr[np.where(mask_arr<threshold and mask_arr>0)].mean(),gtv_arr[np.where(mask_arr<threshold and mask_arr>0)].var()
+	return gtv_arr[np.where(gtv_arr<threshold and gtv_arr>0)].mean(),gtv_arr[np.where(gtv_arr<threshold and gtv_arr>0)].var()
 	
 
 
