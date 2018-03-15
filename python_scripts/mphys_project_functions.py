@@ -7,7 +7,7 @@ from skimage import feature
 import skimage
 
 # generates a mask array from a numpy array
-def create_mask(gtv_arr, threshold = 500,sigma = 0.05, radius_of_mask = 2,small_obj_size = 20):
+def create_mask(gtv_arr, threshold = 500,sigma = 0.5, radius_of_mask = 2,small_obj_size = 20):
 	mask_arr = np.copy(gtv_arr)
 	mask_arr[np.where(mask_arr<threshold)] = 0
 	for i in range(np.shape(mask_arr)[2]):
@@ -21,7 +21,7 @@ def create_mask(gtv_arr, threshold = 500,sigma = 0.05, radius_of_mask = 2,small_
 
 # gets the values of healthy tissue mean and standard devation around the tumour
 def get_healthy_tissue_vals(gtv_arr,threshold = 500):
-	return gtv_arr[np.where(mask_arr<threshold and mask_arr>0)].mean(),gtv_arr[np.where(mask_arr<threshold and mask_arr>0)].var()
+	return [gtv_arr[(gtv_arr<threshold) & (gtv_arr>0)].mean(),gtv_arr[(gtv_arr<threshold) & (gtv_arr>0)].std()]
 	
 
 
