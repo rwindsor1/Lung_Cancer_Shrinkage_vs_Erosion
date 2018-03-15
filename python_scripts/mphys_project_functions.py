@@ -28,4 +28,19 @@ def get_healthy_tissue_vals(gtv_arr,threshold = 500):
 def show_slice(slice_obj):
     fig,axes = plt.subplots(1)
     axes.imshow(slice_obj, cmap='gray',origin='lower')
+	
+def get_noise_info(inArr,threshold =500):
+    img = np.copy(inArr)
+    binary = np.copy(img)
+    binary[np.where(binary < threshold)] = 0
+    binary[np.where(binary >= threshold)] = 1
+    mask = np.copy(binary)
+    mask = create_mask(mask)
+    mask = mask*binary
+    noise = img*(1-binary).astype(float)
+    noise[np.where(noise == 0)] = np.nan
+    noise_mean = np.nanmean(noise)
+    noise_var = np.nanvar(noise)
+    return [noise_mean, noise_var]
+
     
