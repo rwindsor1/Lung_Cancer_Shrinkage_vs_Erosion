@@ -7,7 +7,7 @@ from skimage import feature
 import skimage
 
 # generates a mask array from a numpy array
-def create_mask(gtv_arr, threshold = 500,sigma = 0.05, radius_of_mask = 2,small_obj_size = 20):
+def create_mask(gtv_arr, threshold = 500,sigma = 0.5, radius_of_mask = 2,small_obj_size = 20):
 	mask_arr = np.copy(gtv_arr)
 	mask_arr[np.where(mask_arr<threshold)] = 0
 	for i in range(np.shape(mask_arr)[2]):
