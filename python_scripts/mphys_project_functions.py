@@ -7,7 +7,7 @@ from skimage import feature
 import skimage
 
 # generates a mask array from a numpy array
-def create_mask(gtv_arr, threshold = 500,sigma = 0.5, radius_of_mask = 2,small_obj_size = 20):
+def create_mask(gtv_arr, threshold = 500,sigma = 0.05, radius_of_mask = 2,small_obj_size = 20):
 	mask_arr = np.copy(gtv_arr)
 	mask_arr[np.where(mask_arr<threshold)] = 0
 	for i in range(np.shape(mask_arr)[2]):
@@ -21,7 +21,7 @@ def create_mask(gtv_arr, threshold = 500,sigma = 0.5, radius_of_mask = 2,small_o
 
 # gets the values of healthy tissue mean and standard devation around the tumour
 def get_healthy_tissue_vals(gtv_arr,threshold = 500):
-	return [gtv_arr[(gtv_arr<threshold) & (gtv_arr>0)].mean(),gtv_arr[(gtv_arr<threshold) & (gtv_arr>0)].std()]
+	return gtv_arr[np.where(mask_arr<threshold and mask_arr>0)].mean(),gtv_arr[np.where(mask_arr<threshold and mask_arr>0)].var()
 	
 
 
@@ -34,9 +34,6 @@ def get_noise_info(inArr,threshold =500):
     binary = np.copy(img)
     binary[np.where(binary < threshold)] = 0
     binary[np.where(binary >= threshold)] = 1
-    mask = np.copy(binary)
-    mask = create_mask(mask)
-    mask = mask*binary
     noise = img*(1-binary).astype(float)
     noise[np.where(noise == 0)] = np.nan
     noise_mean = np.nanmean(noise)
