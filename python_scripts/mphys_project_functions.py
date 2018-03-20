@@ -32,11 +32,13 @@ def get_healthy_tissue_vals(gtv_arr,threshold = 500):
 	return gtv_arr[np.where(mask_arr<threshold and mask_arr>0)].mean(),gtv_arr[np.where(mask_arr<threshold and mask_arr>0)].var()
 	
 
-
+# shows the nifti image in handy form
 def show_slice(slice_obj):
 	fig,axes = plt.subplots(1)
 	axes.imshow(slice_obj, cmap='gray',origin='lower')
 	
+	
+# Similar to "get_healthy_tissue_vals", more comprehensive
 def get_noise_info(inArr,threshold =500):
 	img = np.copy(inArr)
 	binary = np.copy(img)
@@ -48,6 +50,16 @@ def get_noise_info(inArr,threshold =500):
 	noise_var = np.nanvar(noise)
 	return [noise_mean, noise_var]
 	
+	
+#			SIMULATION FUNCTIONS
+#
+#	1: ELASTIC SIMULATION
+# Generate 3D array of a simulated elastic shrinkage from an input array "inArr", containing
+# isolated GTV delineation from a CT scan.
+# Does this by using the mask function from semester 1 to locate pixels 1mm deep into tumour
+# then removing them from the original image and replacing these with noise, recreated from the
+# statistics of the noise subtracted from thresholding.
+# 	--- "depth" indicates how many mm to take out (default = 1mm)
 def elastic_sim(inArr, threshold=500, depth = 1):
 	gtv_arr = np.copy(inArr)
 	old_mask = create_mask(inArr, radius_of_mask = depth)
