@@ -51,7 +51,7 @@ def elastic_sim(inArr, threshold=500, depth = 1):
 	noise_var = get_noise_info(inArr)[1]
 	inv_removal_pix=1-removal_pix/255
 	outArr = inv_removal_pix*inArr
-	rand_array = np.random.normal(noise_mean, sqrt(noise_var), size=inArr.shape)
+	rand_array = np.random.normal(noise_mean, math.sqrt(noise_var), size=inArr.shape)
 	add_mask = (1-inv_removal_pix)*rand_array
 	outArr = outArr + add_mask
 	return outArr
