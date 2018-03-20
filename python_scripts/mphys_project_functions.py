@@ -7,14 +7,14 @@ from skimage import feature
 import skimage
 import math
 
-# generates a mask array from a numpy array. Works as follows:
+# Generates a mask array from a numpy array. Works as follows:
+#   1) thresholds (thresholding value specified by kwarg threshold, default is 500)
+#	2) fills holes
+#	3) removes small objects from tumour of size smaller than small_obj_size
+#	4) Use canny edge dector to get edges using specified sigma value
+#	5) Dilate edges to radius given by radius_of_mask
+#
 
-''' 1) thresholds (thresholding value specified by kwarg threshold, default is 500)
-	2) fills holes
-	3) removes small objects from tumour of size smaller than small_obj_size
-	4) Use canny edge dector to get edges using specified sigma value
-	5) Dilate edges to radius given by radius_of_mask
-	'''
 def create_mask(gtv_arr, threshold = 500,sigma = 0.05, radius_of_mask = 2,small_obj_size = 20):
 	mask_arr = np.copy(gtv_arr)
 	mask_arr[np.where(mask_arr<threshold)] = 0
@@ -32,11 +32,13 @@ def get_healthy_tissue_vals(gtv_arr,threshold = 500):
 	return gtv_arr[np.where(mask_arr<threshold and mask_arr>0)].mean(),gtv_arr[np.where(mask_arr<threshold and mask_arr>0)].var()
 	
 
-
+# shows the nifti image in handy form
 def show_slice(slice_obj):
 	fig,axes = plt.subplots(1)
 	axes.imshow(slice_obj, cmap='gray',origin='lower')
 	
+	
+# Similar to "get_healthy_tissue_vals", more comprehensive
 def get_noise_info(inArr,threshold =500):
 	img = np.copy(inArr)
 	binary = np.copy(img)
@@ -48,6 +50,19 @@ def get_noise_info(inArr,threshold =500):
 	noise_var = np.nanvar(noise)
 	return [noise_mean, noise_var]
 	
+	
+#---------------------------------------------------------------------------------------------------------------------------------	
+#---------------------------------------------------------------------------------------------------------------------------------
+#
+#						SIMULATION FUNCTIONS
+#
+#	1: ELASTIC SIMULATION
+# Generate 3D array of a simulated elastic shrinkage from an input array "inArr", containing
+# isolated GTV delineation from a CT scan.
+# Does this by using the mask function from semester 1 to locate pixels 1mm deep into tumour
+# then removing them from the original image and replacing these with noise, recreated from the
+# statistics of the noise subtracted from thresholding.
+# 	--- "depth" indicates how many mm to take out (default = 1mm)
 def elastic_sim(inArr, threshold=500, depth = 1):
 	gtv_arr = np.copy(inArr)
 	old_mask = create_mask(inArr, radius_of_mask = depth)
@@ -62,8 +77,12 @@ def elastic_sim(inArr, threshold=500, depth = 1):
 	add_mask = (1-inv_removal_pix)*rand_array
 	outArr = outArr + add_mask
 	return outArr
-
-
+	
+#
+#	2: FRAGMENTATION SIMULATION
+# Generate 3D array of a simulated fragmentation-style shrinkage from an input array "inArr", containing
+# isolated GTV delineation from a CT scan.
+# Creates a "dissolving" image by removing pixels based on the gradient matrix of the initial image. 
 def fragmenting_sim(inArr, threshold = 500, iterations = 1):
 	gtv = np.copy(inArr)
 	noise_mean = get_noise_info(gtv)[0]
@@ -91,7 +110,12 @@ def fragmenting_sim(inArr, threshold = 500, iterations = 1):
 	print(inArr.min())
 	result[inArr == 0] = np.zeros(result[inArr == 0].shape)
 	return result
-
+#
+#---------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------
+#
+#						END OF SIMULATION FUNCTIONS
+#
 
 
 def get_3D_grad_matrix(matrix):
