@@ -34,19 +34,19 @@ def get_healthy_tissue_vals(gtv_arr,threshold = 500):
 
 
 def show_slice(slice_obj):
-    fig,axes = plt.subplots(1)
-    axes.imshow(slice_obj, cmap='gray',origin='lower')
+	fig,axes = plt.subplots(1)
+	axes.imshow(slice_obj, cmap='gray',origin='lower')
 	
 def get_noise_info(inArr,threshold =500):
-    img = np.copy(inArr)
-    binary = np.copy(img)
-    binary[np.where(binary < threshold)] = 0
-    binary[np.where(binary >= threshold)] = 1
-    noise = img*(1-binary).astype(float)
-    noise[np.where(noise == 0)] = np.nan
-    noise_mean = np.nanmean(noise)
-    noise_var = np.nanvar(noise)
-    return [noise_mean, noise_var]
+	img = np.copy(inArr)
+	binary = np.copy(img)
+	binary[np.where(binary < threshold)] = 0
+	binary[np.where(binary >= threshold)] = 1
+	noise = img*(1-binary).astype(float)
+	noise[np.where(noise == 0)] = np.nan
+	noise_mean = np.nanmean(noise)
+	noise_var = np.nanvar(noise)
+	return [noise_mean, noise_var]
 	
 def elastic_sim(inArr, threshold=500, depth = 1):
 	gtv_arr = np.copy(inArr)
@@ -62,4 +62,38 @@ def elastic_sim(inArr, threshold=500, depth = 1):
 	add_mask = (1-inv_removal_pix)*rand_array
 	outArr = outArr + add_mask
 	return outArr
-    
+
+
+def fragmenting_sim(inArr, threshold = 500, iterations = 1):
+	gtv = inArr
+	noise_mean = get_noise_info(gtv)[0]
+	noise_var = get_noise_info(gtv)[1]
+	noise = np.random.normal(loc=noise_mean, scale=np.sqrt(noise_var), size=gtv.shape)
+	gtv[gtv == 0] = noise[gtv== 0]
+	for i in range(iterations):
+		# generate a mask for the given_gtv
+		mask = create_mask(gtv,threshold = threshold, sigma = 0.5, small_obj_size = 20, radius_of_mask=4 )
+		# fill in mask 
+
+		filled_mask = scipy.ndimage.morphology.binary_fill_holes(mask)
+		# get gradient
+		gradient_of_tumour = get_3D_grad_matrix(gtv)
+		# matrix containing gradients of the actual tumour
+		normalised_gradients = gradient_of_tumour[filled_mask>0]/gradient_of_tumour[filled_mask>0].max()
+		random_samples = np.random.triangular(0, 0.6, 1, size=normalised_gradients.shape)
+		removed_pixels = np.ones(normalised_gradients.shape)
+		removed_pixels[normalised_gradients > random_samples] = 0
+		pixel_remover = np.ones(gtv.shape)
+		pixel_remover[filled_mask > 0] = removed_pixels
+		result = np.multiply(pixel_remover,gtv)
+		result[result == 0] = np.random.normal(loc=noise_mean, scale=np.sqrt(noise_var), size=result[result == 0].shape)
+		gtv = result
+	return result
+
+
+
+def get_3D_grad_matrix(matrix):
+	grad_list = np.gradient(matrix)
+	grad = np.sqrt(np.multiply(grad_list[0], grad_list[0]) + np.multiply(grad_list[1], grad_list[1]) + np.multiply(grad_list[2], grad_list[2]))
+	return grad
+	
