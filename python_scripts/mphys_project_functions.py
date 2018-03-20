@@ -39,5 +39,19 @@ def get_noise_info(inArr,threshold =500):
     noise_mean = np.nanmean(noise)
     noise_var = np.nanvar(noise)
     return [noise_mean, noise_var]
-
+	
+def elastic_sim(inArr, threshold=500, depth = 1):
+	gtv_arr = np.copy(inArr)
+	old_mask = create_mask(inArr, radius_of_mask = depth)
+	gtv_arr[gtv_arr < threshold] = 0
+	gtv_arr[gtv_arr >= threshold] = 1
+	removal_pix = old_mask*gtv_arr
+	noise_mean = get_noise_info(inArr)[0]
+	noise_var = get_noise_info(inArr)[1]
+	inv_removal_pix=1-removal_pix/255
+	outArr = inv_removal_pix*inArr
+	rand_array = np.random.normal(noise_mean, math.sqrt(noise_var), size=inArr.shape)
+	add_mask = (1-inv_removal_pix)*rand_array
+	outArr = outArr + add_mask
+	return outArr
     
