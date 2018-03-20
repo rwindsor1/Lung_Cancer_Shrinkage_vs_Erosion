@@ -58,17 +58,17 @@ def elastic_sim(inArr, threshold=500, depth = 1):
 	noise_var = get_noise_info(inArr)[1]
 	inv_removal_pix=1-removal_pix/255
 	outArr = inv_removal_pix*inArr
-	rand_array = np.random.normal(noise_mean, math.sqrt(noise_var), size=inArr.shape)
+	rand_array = abs(np.random.normal(noise_mean, math.sqrt(noise_var), size=inArr.shape))
 	add_mask = (1-inv_removal_pix)*rand_array
 	outArr = outArr + add_mask
 	return outArr
 
 
 def fragmenting_sim(inArr, threshold = 500, iterations = 1):
-	gtv = inArr
+	gtv = np.copy(inArr)
 	noise_mean = get_noise_info(gtv)[0]
 	noise_var = get_noise_info(gtv)[1]
-	noise = np.random.normal(loc=noise_mean, scale=np.sqrt(noise_var), size=gtv.shape)
+	noise = abs(np.random.normal(loc=noise_mean, scale=np.sqrt(noise_var), size=gtv.shape))
 	gtv[gtv == 0] = noise[gtv== 0]
 	for i in range(iterations):
 		# generate a mask for the given_gtv
@@ -86,8 +86,10 @@ def fragmenting_sim(inArr, threshold = 500, iterations = 1):
 		pixel_remover = np.ones(gtv.shape)
 		pixel_remover[filled_mask > 0] = removed_pixels
 		result = np.multiply(pixel_remover,gtv)
-		result[result == 0] = np.random.normal(loc=noise_mean, scale=np.sqrt(noise_var), size=result[result == 0].shape)
+		result[result == 0] = abs(np.random.normal(loc=noise_mean, scale=np.sqrt(noise_var), size=result[result == 0].shape))
 		gtv = result
+	print(inArr.min())
+	result[inArr == 0] = np.zeros(result[inArr == 0].shape)
 	return result
 
 
