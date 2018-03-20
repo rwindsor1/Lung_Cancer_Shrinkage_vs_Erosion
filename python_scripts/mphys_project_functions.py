@@ -6,7 +6,14 @@ import scipy.ndimage
 from skimage import feature
 import skimage
 
-# generates a mask array from a numpy array
+# generates a mask array from a numpy array. Works as follows:
+
+''' 1) thresholds (thresholding value specified by kwarg threshold, default is 500)
+	2) fills holes
+	3) removes small objects from tumour of size smaller than small_obj_size
+	4) Use canny edge dector to get edges using specified sigma value
+	5) Dilate edges to radius given by radius_of_mask
+	'''
 def create_mask(gtv_arr, threshold = 500,sigma = 0.05, radius_of_mask = 2,small_obj_size = 20):
 	mask_arr = np.copy(gtv_arr)
 	mask_arr[np.where(mask_arr<threshold)] = 0
