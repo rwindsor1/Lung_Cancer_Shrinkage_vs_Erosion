@@ -51,7 +51,10 @@ def get_noise_info(inArr,threshold =500):
 	return [noise_mean, noise_var]
 	
 	
-#			SIMULATION FUNCTIONS
+#---------------------------------------------------------------------------------------------------------------------------------	
+#---------------------------------------------------------------------------------------------------------------------------------
+#
+#						SIMULATION FUNCTIONS
 #
 #	1: ELASTIC SIMULATION
 # Generate 3D array of a simulated elastic shrinkage from an input array "inArr", containing
@@ -74,8 +77,12 @@ def elastic_sim(inArr, threshold=500, depth = 1):
 	add_mask = (1-inv_removal_pix)*rand_array
 	outArr = outArr + add_mask
 	return outArr
-
-
+	
+#
+#	2: FRAGMENTATION SIMULATION
+# Generate 3D array of a simulated fragmentation-style shrinkage from an input array "inArr", containing
+# isolated GTV delineation from a CT scan.
+# Creates a "dissolving" image by removing pixels based on the gradient matrix of the initial image. 
 def fragmenting_sim(inArr, threshold = 500, iterations = 1):
 	gtv = inArr
 	noise_mean = get_noise_info(gtv)[0]
@@ -101,7 +108,12 @@ def fragmenting_sim(inArr, threshold = 500, iterations = 1):
 		result[result == 0] = np.random.normal(loc=noise_mean, scale=np.sqrt(noise_var), size=result[result == 0].shape)
 		gtv = result
 	return result
-
+#
+#---------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------
+#
+#						END OF SIMULATION FUNCTIONS
+#
 
 
 def get_3D_grad_matrix(matrix):
