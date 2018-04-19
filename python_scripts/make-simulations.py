@@ -8,7 +8,7 @@ from mphys_project_functions import fragmenting_sim, elastic_sim
 
 # parameters to change
 no_of_interations = 5
-simulation_type = "non-fragmenting" # should be "non-fragmenting" or "fragmenting"
+simulation_type = "fragmenting" # should be "non-fragmenting" or "fragmenting"
 input_path = "D:/tumourNiftis"
 output_path = "D:/simulated_niftis"
 patients = os.listdir(input_path)
@@ -22,10 +22,14 @@ if (simulation_type != "non-fragmenting") & (simulation_type != "fragmenting"):
 
 # get first nifti for each patient
 for patient in patients:
+	print(patient)
 	arr = nib.load(os.path.join(input_path,patient,os.listdir(os.path.join(input_path,patient))[0])).get_data()
 	for i in range(no_of_interations):
 		if simulation_type == "fragmenting":
-			arr = fragmenting_sim(arr)
+			try:
+				arr = fragmenting_sim(arr)
+			except:
+				break
 		else:
 			arr = elastic_sim(arr)
 
